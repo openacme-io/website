@@ -1,16 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f1729;
-  --foreground: #f0f4ff;
-}
+  /* Background layers */
+  --bg-base: #0a0f1e;
+  --bg-surface: #0d1526;
+  --bg-elevated: #111827;
+  --bg-card: #0f172a;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-active: rgba(99, 102, 241, 0.35);
+
+  /* Colors */
+  --color-primary: #6366f1; /* indigo */
+  --color-accent: #22d3ee; /* cyan, CTA only */
+  --color-uc2: #818cf8;
+  --color-uc3: #34d399;
+
+  /* Text */
+  --text-primary: #f0f4ff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-faint: #475569;
+
+  /* Shadows — the only two on the page */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--bg-base);
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Focus — clean outline, no shadow ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduced motion — kill all transitions/animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
