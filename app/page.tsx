@@ -1,606 +1,1076 @@
-/* eslint-disable @next/next/no-img-element */
+"use client";
 
-/* ---------- Inline SVG icon set (monoline, 20–24px, currentColor) ---------- */
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const IconHex = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M12 2 21 7v10l-9 5-9-5V7l9-5z" />
-  </svg>
-);
+const INSTALL_COMMANDS = {
+  npm: "npx openacme@latest init",
+  pnpm: "pnpm dlx openacme@latest init",
+  bun: "bunx openacme@latest init",
+} as const;
 
-const IconBolt = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" />
-  </svg>
-);
+type Tab = keyof typeof INSTALL_COMMANDS;
 
-const IconClipboard = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <rect x="6" y="4" width="12" height="16" rx="2" />
-    <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
-    <path d="M9 10h6M9 14h6M9 18h4" />
-  </svg>
-);
-
-const IconPersonCircle = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="10" r="3" />
-    <path d="M6.5 19a6 6 0 0 1 11 0" />
-  </svg>
-);
-
-const IconBook = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4V4z" />
-    <path d="M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7V4z" />
-  </svg>
-);
-
-const IconGitBranch = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <circle cx="6" cy="5" r="2" />
-    <circle cx="6" cy="19" r="2" />
-    <circle cx="18" cy="9" r="2" />
-    <path d="M6 7v10" />
-    <path d="M18 11c0 4-6 4-6 8" />
-  </svg>
-);
-
-const IconClockHistory = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M3 12a9 9 0 1 0 3-6.7" />
-    <path d="M3 4v5h5" />
-    <path d="M12 8v4l3 2" />
-  </svg>
-);
-
-/* ---------- Reusable: video tile with fallback ---------- */
-
-function VideoTile({ src, label }: { src: string; label: string }) {
+function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl"
+      className={className}
       style={{
-        aspectRatio: "16 / 9",
-        background: "var(--bg-surface)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        maxWidth: 1200,
+        marginInline: "auto",
+        paddingInline: "clamp(20px, 4vw, 48px)",
       }}
     >
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-label={label}
-        className="absolute inset-0 h-full w-full object-cover"
-      >
-        <source src={src} type="video/mp4" />
-      </video>
-      {/* Fallback rendered behind the video; visible only if the <video> fails to paint */}
+      {children}
+    </div>
+  );
+}
+
+function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <nav
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        height: 64,
+        background: "rgba(20,20,19,0.78)",
+        backdropFilter: "blur(12px) saturate(120%)",
+        WebkitBackdropFilter: "blur(12px) saturate(120%)",
+        borderBottom: scrolled ? "1px solid var(--hairline)" : "1px solid transparent",
+        transition: "border-color 150ms var(--ease-out-quart)",
+      }}
+    >
+      <Container>
+        <div
+          style={{
+            height: 64,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "var(--space-5)",
+          }}
+        >
+          <a
+            href="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-3)",
+              color: "var(--ink-primary)",
+              textDecoration: "none",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-mark-dark.svg" alt="" height={28} style={{ height: 28, width: "auto", display: "block" }} />
+            <span
+              style={{
+                fontFamily: "var(--font-inter-tight), system-ui, sans-serif",
+                fontWeight: 600,
+                fontSize: 16,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              OpenAcme
+            </span>
+          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-6)" }}>
+            <a
+              href="https://github.com/sandydasari/openacme#readme"
+              className="nav-docs"
+              style={{ color: "var(--ink-secondary)", fontSize: 14, fontWeight: 500, textDecoration: "none" }}
+            >
+              Docs
+            </a>
+            <a
+              href="https://github.com/sandydasari/openacme"
+              style={{ color: "var(--ink-secondary)", fontSize: 14, fontWeight: 500, textDecoration: "none" }}
+            >
+              GitHub ↗
+            </a>
+            <a
+              href="#install"
+              style={{
+                background: "var(--ink-primary)",
+                color: "var(--bg-base)",
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "8px 18px",
+                borderRadius: "var(--radius-pill)",
+                textDecoration: "none",
+                lineHeight: 1,
+                display: "inline-flex",
+                alignItems: "center",
+                height: 28,
+                transition: "opacity 150ms var(--ease-out-quart)",
+              }}
+            >
+              Install
+            </a>
+          </div>
+        </div>
+      </Container>
+    </nav>
+  );
+}
+
+function TerminalBlock({ idSuffix }: { idSuffix: string }) {
+  const [tab, setTab] = useState<Tab>("npm");
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<number | null>(null);
+  const command = INSTALL_COMMANDS[tab];
+
+  const copy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(command);
+      setCopied(true);
+      if (timer.current) window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }, [command]);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) window.clearTimeout(timer.current);
+    };
+  }, []);
+
+  return (
+    <div
+      aria-label={`Install command: ${command}`}
+      style={{
+        maxWidth: 720,
+        marginInline: "auto",
+        width: "100%",
+        border: "1px solid var(--hairline-strong)",
+        borderRadius: "var(--radius-block)",
+        overflow: "hidden",
+        background: "var(--bg-base)",
+        textAlign: "left",
+      }}
+    >
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-        aria-hidden="true"
+        style={{
+          height: 36,
+          background: "var(--bg-elevated)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingInline: "var(--space-4)",
+        }}
       >
-        <div style={{ color: "var(--color-accent)", fontSize: 15, fontWeight: 600 }}>▶ Demo video</div>
-        <div style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 6 }}>Recording in progress</div>
+        <div role="tablist" style={{ display: "flex", gap: "var(--space-4)" }}>
+          {(Object.keys(INSTALL_COMMANDS) as Tab[]).map((t) => (
+            <button
+              key={t}
+              id={`tab-${t}-${idSuffix}`}
+              role="tab"
+              aria-selected={tab === t}
+              onClick={() => setTab(t)}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: "4px 0",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: 13,
+                fontWeight: 500,
+                color: tab === t ? "var(--ink-primary)" : "var(--ink-muted)",
+                transition: "color 150ms var(--ease-out-quart)",
+              }}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={copy}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: "4px 8px",
+            color: "var(--ink-secondary)",
+            fontSize: 13,
+            fontWeight: 500,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            transition: "color 150ms var(--ease-out-quart)",
+          }}
+        >
+          <span aria-hidden="true">⧉</span>
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </button>
+      </div>
+      <div
+        role="tabpanel"
+        style={{
+          background: "var(--bg-surface)",
+          padding: "var(--space-5) var(--space-6)",
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: 14,
+          fontWeight: 400,
+          lineHeight: 1.5,
+          overflowX: "auto",
+        }}
+      >
+        <span style={{ color: "var(--ink-muted)" }}>$&nbsp;</span>
+        <span style={{ color: "var(--ink-primary)" }}>{command}</span>
       </div>
     </div>
   );
 }
 
-/* ---------- Page ---------- */
-
-export default function Home() {
+function ChromaticMoment() {
   return (
-    <>
-      {/* ============ NAV ============ */}
-      <header
-        className="sticky top-0 z-50 w-full"
-        style={{
-          background: "rgba(10,15,30,0.9)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          borderBottom: "1px solid var(--border-subtle)",
-        }}
-      >
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6" style={{ height: 56 }}>
-          <a href="#" className="flex items-center gap-2.5" aria-label="OpenAcme home" style={{ color: "var(--text-primary)" }}>
-            <img
-              src="/logo-mark-dark.svg"
-              alt=""
-              width={28}
-              height={28}
-            />
-            <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: "-0.01em" }}>OpenAcme</span>
-          </a>
-          <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
-            <a href="#features" style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)" }} className="transition-colors duration-150 hover:text-[color:var(--text-primary)]">Features</a>
-            <a href="#use-cases" style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)" }} className="transition-colors duration-150 hover:text-[color:var(--text-primary)]">Use Cases</a>
-          </nav>
-          <a
-            href="#cta"
-            className="inline-flex items-center rounded-lg transition-opacity duration-150 hover:opacity-90"
+    <div
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none",
+        zIndex: 0,
+      }}
+    >
+      <svg width="500" height="560" viewBox="-250 -280 500 560" style={{ display: "block", mixBlendMode: "screen" }}>
+        {[-120, 0, 120].map((x, i) => (
+          <ellipse
+            key={x}
+            cx={x}
+            cy={0}
+            rx={40}
+            ry={260}
+            fill="#d97757"
+            opacity={0.75}
             style={{
-              background: "var(--color-accent)",
-              color: "#0f1729",
-              fontSize: 14,
-              fontWeight: 600,
-              padding: "8px 16px",
+              transformOrigin: "center",
+              animation: `arc-drift 6s ease-in-out ${i * 1.5}s infinite`,
             }}
-          >
-            <span className="hidden md:inline">Get Started</span>
-            <span className="md:hidden" style={{ fontSize: 13, padding: "0 2px" }}>Get Started</span>
-          </a>
-        </div>
-      </header>
-
-      <main className="flex-1">
-        {/* ============ HERO ============ */}
-        <section
-          style={{ background: "var(--bg-surface)" }}
-        >
-          <div className="mx-auto max-w-[1280px] px-6 py-16 lg:pt-20 lg:pb-16">
-            <div className="grid items-center gap-12 lg:grid-cols-[55fr_45fr]">
-              {/* Text column */}
-              <div>
-                <span
-                  className="inline-block rounded-full"
-                  style={{
-                    background: "rgba(34,211,238,0.12)",
-                    border: "1px solid rgba(34,211,238,0.25)",
-                    color: "var(--color-accent)",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    padding: "4px 12px",
-                  }}
-                >
-                  Now in public beta
-                </span>
-
-                <h1
-                  className="mt-5"
-                  style={{
-                    color: "var(--text-primary)",
-                    fontWeight: 700,
-                    letterSpacing: "-0.02em",
-                    maxWidth: 600,
-                  }}
-                >
-                  <span className="block" style={{ fontSize: "clamp(40px, 6vw, 64px)", lineHeight: 1.1 }}>
-                    Run a 5-person AI team
-                  </span>
-                  <span className="block" style={{ fontSize: "clamp(40px, 6vw, 64px)", lineHeight: 1.1 }}>
-                    with one operator.
-                  </span>
-                </h1>
-
-                <p
-                  className="mt-5"
-                  style={{
-                    color: "var(--text-secondary)",
-                    fontSize: "clamp(16px, 1.5vw, 18px)",
-                    lineHeight: 1.6,
-                    maxWidth: 520,
-                  }}
-                >
-                  OpenAcme gives each agent a role, memory, and tools — they coordinate, hand off work, and ship. You review results, not steps.
-                </p>
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <a
-                    href="#cta"
-                    className="inline-flex items-center justify-center rounded-xl transition-opacity duration-150 hover:opacity-90"
-                    style={{
-                      background: "var(--color-accent)",
-                      color: "#0f1729",
-                      fontWeight: 700,
-                      fontSize: 16,
-                      padding: "14px 28px",
-                    }}
-                  >
-                    Request Early Access →
-                  </a>
-                  <a
-                    href="#use-cases"
-                    className="inline-flex items-center justify-center rounded-xl transition-colors duration-150"
-                    style={{
-                      background: "transparent",
-                      border: "1px solid rgba(34,211,238,0.35)",
-                      color: "var(--color-accent)",
-                      fontWeight: 600,
-                      fontSize: 16,
-                      padding: "13px 28px",
-                    }}
-                  >
-                    Watch the demo ↓
-                  </a>
-                </div>
-              </div>
-
-              {/* Task-board mockup (right column, desktop only) */}
-              <div className="hidden lg:block">
-                <div
-                  className="w-full"
-                  style={{
-                    background: "var(--bg-surface)",
-                    border: "1px solid #1e3a6e",
-                    borderRadius: 16,
-                    padding: 20,
-                    maxWidth: 560,
-                    boxShadow: "var(--shadow-sm)",
-                  }}
-                >
-                  {/* Mock header row */}
-                  <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-                    <div className="flex items-center gap-2">
-                      <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
-                      <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
-                      <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-                    </div>
-                    <span style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                      Task Board
-                    </span>
-                  </div>
-                  {/* Mock task rows */}
-                  <ul className="flex flex-col" style={{ gap: 10 }}>
-                    {[
-                      { agent: "manager", title: "Decompose: ship pricing page", status: "done" },
-                      { agent: "designer", title: "Spec: pricing layout + tokens", status: "done" },
-                      { agent: "builder", title: "Implement /pricing", status: "running" },
-                      { agent: "deployer", title: "Deploy to Vercel", status: "queued" },
-                    ].map((row, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center justify-between"
-                        style={{
-                          background: "rgba(255,255,255,0.02)",
-                          border: "1px solid var(--border-subtle)",
-                          borderRadius: 10,
-                          padding: "10px 14px",
-                        }}
-                      >
-                        <div className="flex items-center" style={{ gap: 12, minWidth: 0 }}>
-                          <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", width: 76, flexShrink: 0 }}>
-                            @{row.agent}
-                          </span>
-                          <span style={{ fontSize: 13, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {row.title}
-                          </span>
-                        </div>
-                        <StatusBadge status={row.status as "done" | "running" | "queued"} />
-                      </li>
-                    ))}
-                  </ul>
-                  {/* Mock footer */}
-                  <div className="flex items-center justify-between" style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid var(--border-subtle)" }}>
-                    <span style={{ color: "var(--text-faint)", fontSize: 12 }}>4 tasks · 1 running</span>
-                    <span style={{ color: "var(--text-muted)", fontSize: 12 }}>updated just now</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ============ PROOF BAR ============ */}
-        <section
-          style={{
-            background: "var(--bg-surface)",
-            borderTop: "1px solid var(--border-subtle)",
-            borderBottom: "1px solid var(--border-subtle)",
-          }}
-        >
-          <div className="mx-auto max-w-[1280px] px-6" style={{ paddingTop: 20, paddingBottom: 20 }}>
-            <ul className="flex flex-col items-start justify-center gap-4 sm:flex-row sm:items-center sm:gap-12">
-              {[
-                { icon: <IconHex width={16} height={16} />, label: "Open source core" },
-                { icon: <IconBolt width={16} height={16} />, label: "Ships to Vercel in under 2 minutes" },
-                { icon: <IconClipboard width={16} height={16} />, label: "Full task-graph audit trail" },
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-2.5">
-                  <span style={{ color: "var(--color-accent)" }}>{item.icon}</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: 14 }}>{item.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* ============ FEATURES ============ */}
-        <section id="features" style={{ background: "var(--bg-elevated)" }}>
-          <div className="mx-auto max-w-[1280px] px-6 py-20 lg:py-24">
-            <div className="mx-auto max-w-[640px] text-center">
-              <div style={{ color: "var(--color-accent)", fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                How it works
-              </div>
-              <h2
-                className="mt-3"
-                style={{
-                  color: "var(--text-primary)",
-                  fontSize: "clamp(32px, 4vw, 40px)",
-                  lineHeight: 1.2,
-                  fontWeight: 700,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                One platform. A full specialist team.
-              </h2>
-              <p className="mt-4" style={{ color: "var(--text-secondary)", fontSize: 18, lineHeight: 1.6 }}>
-                Each agent owns its domain. The task graph wires them together. You stay in the loop only when a decision matters.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-6 lg:grid-cols-2">
-              <FeatureCard icon={<IconPersonCircle width={20} height={20} />} title="Role-specialized agents">
-                Each agent has a defined role — manager, builder, designer, deployer. They pick up tasks in their domain and hand off when done. No cross-talk, no dropped balls.
-              </FeatureCard>
-              <FeatureCard icon={<IconBook width={20} height={20} />} title="On-demand skill loading">
-                Agents load skills only when needed — coding conventions, platform guides, deployment checklists. Zero prompt bloat. Add a new capability by dropping in a file.
-              </FeatureCard>
-              <FeatureCard icon={<IconGitBranch width={20} height={20} />} title="Dependency-aware task graph">
-                Tasks declare what they depend on. The scheduler unblocks them automatically when deps resolve. Work flows at the right speed — parallel where possible, sequential where required.
-              </FeatureCard>
-              <FeatureCard icon={<IconClockHistory width={20} height={20} />} title="Persistent memory + full audit trail">
-                Every decision, comment, and handoff is logged. Agents remember past context. The worklog gives you a timestamped record of everything the team shipped — no black boxes.
-              </FeatureCard>
-            </div>
-          </div>
-        </section>
-
-        {/* ============ USE CASES ============ */}
-        <section id="use-cases" style={{ background: "var(--bg-elevated)", borderTop: "1px solid var(--border-subtle)" }}>
-          <div className="mx-auto max-w-[1280px] px-6 py-24">
-            <div className="mx-auto max-w-[640px] text-center">
-              <div style={{ color: "var(--color-accent)", fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                Real workflows
-              </div>
-              <h2
-                className="mt-3"
-                style={{
-                  color: "var(--text-primary)",
-                  fontSize: "clamp(32px, 4vw, 40px)",
-                  lineHeight: 1.2,
-                  fontWeight: 700,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                What your AI team ships.
-              </h2>
-            </div>
-
-            <div className="mt-16 flex flex-col" style={{ gap: 80 }}>
-              <UseCase
-                number="01"
-                accent="var(--color-accent)"
-                heading="Build and deploy a full website — while you watch."
-                before="Hours of scaffolding, component work, and deploy configuration."
-                after="One goal typed in plain English. Manager decomposes it, builder implements, deployer ships. Live URL in minutes."
-                video="/videos/demo-website-build.mp4"
-                videoLabel="OpenAcme building and deploying a website"
-                reverse={false}
-              />
-              <UseCase
-                number="02"
-                accent="var(--color-uc2)"
-                heading="Every pull request reviewed before it touches main."
-                before="Review backlogs that slow down merges and miss regressions."
-                after="Reviewer agent reads the diff, checks conventions, flags issues, routes fixes back. Merge with confidence."
-                video="/videos/demo-code-review.mp4"
-                videoLabel="OpenAcme reviewing a pull request"
-                reverse={true}
-              />
-              <UseCase
-                number="03"
-                accent="var(--color-uc3)"
-                heading="Multi-step data pipelines that run themselves."
-                before="Manual handoffs between ingest, transform, validate, and report stages."
-                after="Each stage owned by a dedicated agent. Failures route to the right specialist automatically. Data arrives clean, on schedule."
-                video="/videos/demo-data-pipeline.mp4"
-                videoLabel="OpenAcme running a multi-step data pipeline"
-                reverse={false}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ============ CTA BANNER ============ */}
-        <section
-          id="cta"
-          style={{
-            background: "var(--bg-base)",
-            borderTop: "1px solid var(--border-subtle)",
-          }}
-        >
-          <div className="mx-auto max-w-[640px] px-6 py-24 text-center">
-            <div className="flex justify-center" style={{ color: "var(--text-primary)" }}>
-              <img src="/logo-mark-dark.svg" alt="" width={32} height={32} />
-            </div>
-            <h2
-              className="mt-5"
-              style={{
-                color: "var(--text-primary)",
-                fontSize: "clamp(32px, 4.5vw, 44px)",
-                lineHeight: 1.15,
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Your AI workforce is one command away.
-            </h2>
-            <p className="mt-4" style={{ color: "var(--text-secondary)", fontSize: 18, lineHeight: 1.6 }}>
-              No infrastructure. No prompt engineering. Just define the goal — OpenAcme routes it, works it, and ships it.
-            </p>
-            <div className="mt-9 flex justify-center">
-              <a
-                href="https://github.com/sandydasari/openacme"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center justify-center rounded-xl transition-opacity duration-150 hover:opacity-90"
-                style={{
-                  background: "var(--color-accent)",
-                  color: "#0f1729",
-                  fontWeight: 700,
-                  fontSize: 17,
-                  padding: "16px 32px",
-                }}
-              >
-                Request Early Access →
-              </a>
-            </div>
-            <p className="mt-3" style={{ color: "var(--text-muted)", fontSize: 13 }}>
-              No credit card. No infra setup. Just agents.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      {/* ============ FOOTER ============ */}
-      <footer style={{ background: "#070b14", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <div className="mx-auto max-w-[1280px] px-6 py-8">
-          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-            <a href="#" className="flex items-center gap-2.5" aria-label="OpenAcme home" style={{ color: "var(--text-secondary)" }}>
-              <img src="/logo-mark-dark.svg" alt="" width={24} height={24} />
-              <span style={{ fontSize: 14, fontWeight: 600 }}>OpenAcme</span>
-            </a>
-            <nav className="flex flex-wrap items-center gap-6" aria-label="Footer">
-              <a href="#features" style={{ fontSize: 14, color: "var(--text-muted)" }} className="transition-colors duration-150 hover:text-[color:var(--text-secondary)]">Features</a>
-              <a href="#use-cases" style={{ fontSize: 14, color: "var(--text-muted)" }} className="transition-colors duration-150 hover:text-[color:var(--text-secondary)]">Use Cases</a>
-              <a href="https://github.com/sandydasari/openacme" target="_blank" rel="noreferrer noopener" style={{ fontSize: 14, color: "var(--text-muted)" }} className="transition-colors duration-150 hover:text-[color:var(--text-secondary)]">Docs</a>
-              <a href="#" style={{ fontSize: 14, color: "var(--text-muted)" }} className="transition-colors duration-150 hover:text-[color:var(--text-secondary)]">Privacy</a>
-            </nav>
-            <span style={{ fontSize: 13, color: "var(--text-faint)" }}>© 2026 OpenAcme, Inc.</span>
-          </div>
-        </div>
-      </footer>
-    </>
+          />
+        ))}
+      </svg>
+    </div>
   );
 }
 
-/* ---------- Subcomponents ---------- */
+function Hero() {
+  return (
+    <section
+      style={{
+        paddingBlock: "clamp(96px, 12vw, 168px) clamp(64px, 8vw, 112px)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <Container>
+        <div style={{ position: "relative", maxWidth: 880, marginInline: "auto", textAlign: "center" }}>
+          <div style={{ position: "relative" }}>
+            <ChromaticMoment />
+            <h1
+              style={{
+                position: "relative",
+                zIndex: 1,
+                margin: 0,
+                fontSize: "clamp(2.5rem, 5vw + 1rem, 4.5rem)",
+                letterSpacing: "-0.035em",
+                lineHeight: 0.98,
+                mixBlendMode: "difference",
+                color: "var(--ink-primary)",
+              }}
+            >
+              Run a 5-person AI team with one operator.
+            </h1>
+          </div>
 
-function StatusBadge({ status }: { status: "done" | "running" | "queued" }) {
+          <p
+            style={{
+              marginTop: "var(--space-6)",
+              marginInline: "auto",
+              maxWidth: 560,
+              fontSize: 18,
+              lineHeight: 1.55,
+              color: "var(--ink-secondary)",
+              fontWeight: 400,
+            }}
+          >
+            OpenAcme gives each agent a role, memory, and tools. They coordinate, hand off, and ship. You review results — not steps.
+          </p>
+
+          <div
+            style={{
+              marginTop: "var(--space-7)",
+              display: "flex",
+              gap: "var(--space-3)",
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <a
+              href="#install"
+              style={{
+                background: "var(--ink-primary)",
+                color: "var(--bg-base)",
+                fontSize: 16,
+                fontWeight: 500,
+                padding: "14px 28px",
+                borderRadius: "var(--radius-pill)",
+                textDecoration: "none",
+                lineHeight: 1,
+                transition: "opacity 150ms var(--ease-out-quart)",
+              }}
+            >
+              Install
+            </a>
+            <a
+              href="https://github.com/sandydasari/openacme#readme"
+              style={{
+                background: "transparent",
+                color: "var(--ink-secondary)",
+                border: "1px solid var(--hairline-strong)",
+                fontSize: 16,
+                fontWeight: 500,
+                padding: "14px 28px",
+                borderRadius: "var(--radius-card)",
+                textDecoration: "none",
+                lineHeight: 1,
+                transition: "border-color 150ms var(--ease-out-quart), color 150ms var(--ease-out-quart)",
+              }}
+            >
+              Read the docs
+            </a>
+          </div>
+
+          <div id="install" style={{ marginTop: "var(--space-8)" }}>
+            <TerminalBlock idSuffix="hero" />
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+const STEPS = [
+  { n: "01", title: "Define a goal", body: 'Type one sentence: "Ship a pricing page by Friday."' },
+  { n: "02", title: "Watch the team plan", body: "Manager decomposes. Builder builds. Designer reviews. Deployer ships." },
+  { n: "03", title: "Review what shipped", body: "You see a working URL — and the full audit trail of how it got there." },
+];
+
+function HowItWorks() {
+  return (
+    <section style={{ paddingBlock: "var(--space-10)" }}>
+      <Container>
+        <h2
+          style={{
+            margin: "0 auto var(--space-8)",
+            maxWidth: 720,
+            textAlign: "center",
+            fontSize: "clamp(2rem, 3vw + 1rem, 3.25rem)",
+            letterSpacing: "-0.03em",
+            lineHeight: 1.02,
+            color: "var(--ink-primary)",
+          }}
+        >
+          How a team ships.
+        </h2>
+        <div style={{ borderTop: "1px solid var(--hairline)" }}>
+          {STEPS.map((step) => (
+            <div
+              key={step.n}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "60px 1fr",
+                gap: "var(--space-5)",
+                paddingBlock: "var(--space-6)",
+                borderBottom: "1px solid var(--hairline)",
+              }}
+            >
+              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 14, fontWeight: 500, color: "var(--ink-muted)" }}>
+                {step.n}
+              </div>
+              <div>
+                <h3
+                  style={{
+                    margin: 0,
+                    marginBottom: "var(--space-2)",
+                    fontSize: 22,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                    color: "var(--ink-primary)",
+                  }}
+                >
+                  {step.title}
+                </h3>
+                <p style={{ margin: 0, maxWidth: "56ch", fontSize: 16, lineHeight: 1.55, color: "var(--ink-secondary)" }}>
+                  {step.body}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+type Status = "done" | "running" | "queued" | "waiting";
+
+function StatusBadge({ kind }: { kind: Status }) {
   const map = {
-    done: { bg: "rgba(34,197,94,0.12)", color: "#22c55e", label: "✓ done" },
-    running: { bg: "rgba(34,211,238,0.12)", color: "var(--color-accent)", label: "● running" },
-    queued: { bg: "rgba(148,163,184,0.12)", color: "var(--text-secondary)", label: "○ queued" },
-  } as const;
-  const s = map[status];
+    done: { glyph: "✓", label: "done", glyphColor: "var(--ink-primary)", labelColor: "var(--ink-secondary)" },
+    running: { glyph: "●", label: "run", glyphColor: "var(--accent-glow)", labelColor: "var(--ink-secondary)" },
+    queued: { glyph: "○", label: "queue", glyphColor: "var(--ink-muted)", labelColor: "var(--ink-muted)" },
+    waiting: { glyph: "○", label: "wait", glyphColor: "var(--ink-muted)", labelColor: "var(--ink-muted)" },
+  }[kind];
   return (
     <span
       style={{
-        background: s.bg,
-        color: s.color,
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: "0.04em",
-        padding: "3px 8px",
-        borderRadius: 6,
-        whiteSpace: "nowrap",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: "var(--bg-elevated)",
+        borderRadius: "var(--radius-chip)",
+        padding: "2px 8px",
+        fontFamily: "var(--font-jetbrains-mono), monospace",
+        fontSize: 12,
+        lineHeight: 1.4,
       }}
     >
-      {s.label}
+      <span style={{ color: map.glyphColor, fontSize: 12, lineHeight: 1 }}>{map.glyph}</span>
+      <span style={{ color: map.labelColor }}>{map.label}</span>
     </span>
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-}) {
+function MockupFrame({ header, right, children }: { header: string; right: React.ReactNode; children: React.ReactNode }) {
   return (
     <div
-      className="group transition-colors duration-150"
       style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-subtle)",
-        borderRadius: 10,
-        padding: 28,
-        boxShadow: "var(--shadow-sm)",
+        width: "100%",
+        background: "var(--bg-surface)",
+        border: "1px solid var(--hairline-strong)",
+        borderRadius: "var(--radius-block)",
       }}
     >
       <div
-        className="flex items-center justify-center"
         style={{
-          width: 40,
           height: 40,
-          background: "rgba(99,102,241,0.12)",
-          borderRadius: 12,
-          color: "var(--color-primary)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingInline: "var(--space-5)",
+          borderBottom: "1px solid var(--hairline)",
         }}
       >
-        {icon}
+        <span
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 12,
+            fontWeight: 500,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "var(--ink-muted)",
+          }}
+        >
+          {header}
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 12,
+            color: "var(--ink-muted)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          {right}
+        </span>
       </div>
-      <h3 className="mt-4" style={{ color: "var(--text-primary)", fontSize: 17, fontWeight: 600, lineHeight: 1.4 }}>
-        {title}
-      </h3>
-      <p className="mt-2" style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.65 }}>
-        {children}
-      </p>
+      {children}
     </div>
   );
 }
 
-function UseCase({
-  number,
-  accent,
-  heading,
-  before,
-  after,
-  video,
-  videoLabel,
-  reverse,
-}: {
-  number: string;
-  accent: string;
-  heading: string;
-  before: string;
-  after: string;
-  video: string;
-  videoLabel: string;
-  reverse: boolean;
-}) {
+const TASK_ROWS: { agent: string; title: string; status: Status }[] = [
+  { agent: "@manager", title: "Decompose: ship pricing page", status: "done" },
+  { agent: "@designer", title: "Spec: pricing layout + tokens", status: "done" },
+  { agent: "@builder", title: "Implement /pricing", status: "running" },
+  { agent: "@deployer", title: "Deploy to Vercel", status: "queued" },
+];
+
+function TaskBoardMockup() {
   return (
-    <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-      <div className={reverse ? "lg:order-2" : ""}>
-          <div style={{ color: accent, fontSize: 13, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            {number}
-          </div>
-          <h3
-            className="mt-3"
+    <MockupFrame
+      header="Task Board"
+      right={
+        <>
+          <span>4 tasks · 1</span>
+          <span style={{ color: "var(--accent-glow)" }}>●</span>
+        </>
+      }
+    >
+      <div>
+        {TASK_ROWS.map((row, i) => (
+          <div
+            key={row.title}
             style={{
-              color: "var(--text-primary)",
-              fontSize: "clamp(22px, 2.4vw, 26px)",
-              lineHeight: 1.3,
-              fontWeight: 600,
-              letterSpacing: "-0.005em",
-              maxWidth: 480,
+              minHeight: 56,
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 120px) minmax(0, 1fr) minmax(0, auto)",
+              alignItems: "center",
+              gap: "var(--space-4)",
+              paddingInline: "var(--space-5)",
+              paddingBlock: "var(--space-3)",
+              borderTop: i === 0 ? "none" : "1px solid var(--hairline)",
             }}
           >
-            {heading}
-          </h3>
-          <dl className="mt-5 flex flex-col" style={{ gap: 10, maxWidth: 480 }}>
-            <div>
-              <dt style={{ color: "var(--text-muted)", fontSize: 13, fontWeight: 600 }}>Before:</dt>
-              <dd style={{ color: "var(--text-secondary)", fontSize: 15, fontStyle: "italic", lineHeight: 1.6, marginTop: 2 }}>{before}</dd>
-            </div>
-            <div>
-              <dt style={{ color: "var(--text-muted)", fontSize: 13, fontWeight: 600 }}>After:</dt>
-              <dd style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.6, marginTop: 2 }}>{after}</dd>
-            </div>
-          </dl>
-        </div>
-      <div className={reverse ? "lg:order-1" : ""}>
-        <VideoTile src={video} label={videoLabel} />
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 13, color: "var(--ink-muted)" }}>
+              {row.agent}
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink-primary)" }}>{row.title}</span>
+            <span style={{ display: "flex", justifyContent: "flex-end" }}>
+              <StatusBadge kind={row.status} />
+            </span>
+          </div>
+        ))}
       </div>
+    </MockupFrame>
+  );
+}
+
+function ReviewThreadMockup() {
+  return (
+    <MockupFrame header="Pull Request" right={<StatusBadge kind="running" />}>
+      <div style={{ padding: "var(--space-5)", display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-3)" }}>
+          <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 13, color: "var(--ink-muted)" }}>#142</span>
+          <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink-primary)" }}>Add /pricing route</span>
+        </div>
+        <div>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, color: "var(--ink-muted)", marginBottom: "var(--space-2)" }}>
+            @reviewer · 2 min ago
+          </div>
+          <div
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--hairline)",
+              borderRadius: "var(--radius-block)",
+              padding: "var(--space-4)",
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: "var(--ink-primary)",
+            }}
+          >
+            4 changes look right. One nit: the Pro tier card uses <span className="mono">rgba(...)</span> instead of <span className="mono">var(--accent)</span>. Mind fixing?
+          </div>
+        </div>
+        <div>
+          <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, color: "var(--ink-muted)", marginBottom: "var(--space-2)" }}>
+            @builder · just now
+          </div>
+          <div
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--hairline)",
+              borderRadius: "var(--radius-block)",
+              padding: "var(--space-4)",
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: "var(--ink-primary)",
+            }}
+          >
+            Fixed. Pushed as <span className="mono">e3a4f9</span>.
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+const PIPELINE_ROWS: { agent: string; cadence: string; last: string; status: Status }[] = [
+  { agent: "@ingest", cadence: "every 4h", last: "last ran 2m ago", status: "done" },
+  { agent: "@transform", cadence: "every 4h", last: "last ran 1m ago", status: "running" },
+  { agent: "@publish", cadence: "daily 09:00", last: "last ran 18h ago", status: "waiting" },
+];
+
+function ScheduledRunsMockup() {
+  return (
+    <MockupFrame header="Scheduled Runs" right={<span>3 active</span>}>
+      <div>
+        {PIPELINE_ROWS.map((row, i) => (
+          <div
+            key={row.agent}
+            style={{
+              minHeight: 56,
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 110px) minmax(0, 1fr) minmax(0, 1fr) minmax(0, auto)",
+              alignItems: "center",
+              gap: "var(--space-4)",
+              paddingInline: "var(--space-5)",
+              paddingBlock: "var(--space-3)",
+              borderTop: i === 0 ? "none" : "1px solid var(--hairline)",
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 13, color: "var(--ink-muted)" }}>
+              {row.agent}
+            </span>
+            <span style={{ fontSize: 14, color: "var(--ink-secondary)" }}>{row.cadence}</span>
+            <span style={{ fontSize: 14, color: "var(--ink-secondary)" }}>{row.last}</span>
+            <span style={{ display: "flex", justifyContent: "flex-end" }}>
+              <StatusBadge kind={row.status} />
+            </span>
+          </div>
+        ))}
+      </div>
+    </MockupFrame>
+  );
+}
+
+function UseCase({
+  kicker,
+  title,
+  body,
+  videoSrc,
+  videoLabel,
+  mockup,
+  textFirst,
+}: {
+  kicker: string;
+  title: string;
+  body: string;
+  videoSrc: string;
+  videoLabel: string;
+  mockup: React.ReactNode;
+  textFirst: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  return (
+    <div>
+      <div className={`use-case-row ${textFirst ? "text-first" : "mockup-first"}`}>
+        <div className="use-case-text">
+          <div
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 14,
+              fontWeight: 500,
+              color: "var(--ink-muted)",
+              marginBottom: "var(--space-2)",
+            }}
+          >
+            {kicker}
+          </div>
+          <h3
+            style={{
+              margin: 0,
+              marginBottom: "var(--space-4)",
+              fontSize: "clamp(1.375rem, 1.2vw + 1rem, 1.75rem)",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              color: "var(--ink-primary)",
+            }}
+          >
+            {title}
+          </h3>
+          <p
+            style={{
+              margin: 0,
+              marginBottom: "var(--space-5)",
+              maxWidth: "52ch",
+              fontSize: 16,
+              lineHeight: 1.55,
+              color: "var(--ink-secondary)",
+            }}
+          >
+            {body}
+          </p>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: "8px 0",
+              cursor: "pointer",
+              color: open ? "var(--ink-primary)" : "var(--ink-secondary)",
+              fontSize: 14,
+              fontWeight: 500,
+              transition: "color 150ms var(--ease-out-quart)",
+            }}
+          >
+            {open ? "Hide the full run ↑" : "Watch the full run →"}
+          </button>
+        </div>
+        <div className="use-case-mockup" style={{ minWidth: 0 }}>
+          {mockup}
+        </div>
+      </div>
+      {open && (
+        <div style={{ marginTop: "var(--space-6)" }}>
+          {videoError ? (
+            <div
+              style={{
+                maxWidth: 720,
+                marginInline: "auto",
+                border: "1px solid var(--hairline-strong)",
+                borderRadius: 0,
+                padding: "var(--space-6)",
+                fontSize: 14,
+                color: "var(--ink-muted)",
+                textAlign: "center",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+              }}
+            >
+              Video unavailable.
+            </div>
+          ) : (
+            <video
+              src={videoSrc}
+              aria-label={videoLabel}
+              autoPlay
+              muted
+              loop
+              playsInline
+              onError={() => setVideoError(true)}
+              style={{
+                display: "block",
+                maxWidth: 720,
+                width: "100%",
+                marginInline: "auto",
+                border: "1px solid var(--hairline-strong)",
+                borderRadius: 0,
+              }}
+            />
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+function UseCases() {
+  return (
+    <section style={{ paddingBlock: "var(--space-10)" }}>
+      <Container>
+        <h2
+          style={{
+            margin: "0 auto var(--space-9)",
+            maxWidth: 720,
+            textAlign: "center",
+            fontSize: "clamp(2rem, 3vw + 1rem, 3.25rem)",
+            letterSpacing: "-0.03em",
+            lineHeight: 1.02,
+            color: "var(--ink-primary)",
+          }}
+        >
+          What your AI team ships.
+        </h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-10)" }}>
+          <UseCase
+            kicker="01"
+            title="Build and ship a website while you watch."
+            body="One goal in. Manager decomposes the brief, builder implements, designer reviews, deployer ships to Vercel. The URL is live in minutes."
+            videoSrc="/videos/demo-website-build.mp4"
+            videoLabel="Website build demo"
+            mockup={<TaskBoardMockup />}
+            textFirst
+          />
+          <UseCase
+            kicker="02"
+            title="Every pull request reviewed before it touches main."
+            body="Reviewer agent reads the diff, checks conventions, flags issues, routes fixes back. Merge with confidence."
+            videoSrc="/videos/demo-code-review.mp4"
+            videoLabel="Code review demo"
+            mockup={<ReviewThreadMockup />}
+            textFirst={false}
+          />
+          <UseCase
+            kicker="03"
+            title="Multi-step pipelines that run themselves."
+            body="Each stage owned by a dedicated agent. Failures route to the right specialist automatically. Data arrives clean, on schedule."
+            videoSrc="/videos/demo-data-pipeline.mp4"
+            videoLabel="Data pipeline demo"
+            mockup={<ScheduledRunsMockup />}
+            textFirst
+          />
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+const FEATURES = [
+  { title: "Role-specialized agents", body: "Manager / Builder / Designer / Deployer. Each owns a domain." },
+  { title: "On-demand skill loading", body: "Agents load capabilities only when needed. No prompt bloat." },
+  { title: "Dependency-aware task graph", body: "Tasks declare deps. The scheduler unblocks them automatically." },
+  { title: "Persistent memory + full audit trail", body: "Every decision logged. Agents remember. No black boxes." },
+];
+
+function Features() {
+  return (
+    <section style={{ paddingBlock: "var(--space-10)" }}>
+      <Container>
+        <div
+          style={{
+            textAlign: "center",
+            fontFamily: "var(--font-inter-tight), system-ui, sans-serif",
+            fontWeight: 600,
+            fontSize: 18,
+            color: "var(--ink-secondary)",
+            marginBottom: "var(--space-6)",
+          }}
+        >
+          Built for operators.
+        </div>
+        <div style={{ borderTop: "1px solid var(--hairline)" }}>
+          {FEATURES.map((f) => (
+            <div
+              key={f.title}
+              style={{
+                paddingBlock: "var(--space-5)",
+                borderBottom: "1px solid var(--hairline)",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  marginBottom: "var(--space-2)",
+                  fontSize: 20,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2,
+                  color: "var(--ink-primary)",
+                }}
+              >
+                {f.title}
+              </h3>
+              <p style={{ margin: 0, maxWidth: "65ch", fontSize: 16, lineHeight: 1.55, color: "var(--ink-secondary)" }}>
+                {f.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+const COMMITS = [
+  { hash: "e3a4f9", author: "builder", verb: "fix(pricing):", rest: "use var(--accent)", time: "2m" },
+  { hash: "b71c20", author: "reviewer", verb: "review:", rest: "4 changes, 1 nit", time: "8m" },
+  { hash: "a1f330", author: "builder", verb: "feat(pricing):", rest: "add Pro tier card", time: "14m" },
+  { hash: "9c2b88", author: "designer", verb: "spec:", rest: "pricing layout + tokens", time: "32m" },
+  { hash: "7e4d11", author: "manager", verb: "decompose:", rest: "ship pricing page", time: "1h" },
+];
+
+function Proof() {
+  return (
+    <section style={{ paddingBlock: "var(--space-10)" }}>
+      <Container>
+        <div style={{ maxWidth: 880, marginInline: "auto" }}>
+          <MockupFrame header="Activity" right={<span>last 24h</span>}>
+            <div>
+              {COMMITS.map((c, i) => (
+                <div
+                  key={c.hash}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "80px 100px 1fr auto",
+                    alignItems: "baseline",
+                    gap: "var(--space-4)",
+                    paddingInline: "var(--space-5)",
+                    paddingBlock: "var(--space-3)",
+                    borderTop: i === 0 ? "none" : "1px solid var(--hairline)",
+                  }}
+                >
+                  <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 13, color: "var(--ink-muted)" }}>
+                    {c.hash}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 13, color: "var(--ink-muted)" }}>
+                    {c.author}
+                  </span>
+                  <span style={{ fontSize: 14 }}>
+                    <span style={{ color: "var(--ink-primary)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                      {c.verb}
+                    </span>
+                    <span style={{ color: "var(--ink-secondary)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                      {" "}
+                      {c.rest}
+                    </span>
+                  </span>
+                  <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 12, color: "var(--ink-muted)", textAlign: "right" }}>
+                    {c.time}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </MockupFrame>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function CtaBanner() {
+  return (
+    <section style={{ paddingBlock: "var(--space-10)" }}>
+      <Container>
+        <div style={{ maxWidth: 720, marginInline: "auto", textAlign: "center" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-mark-dark.svg"
+            alt=""
+            height={28}
+            style={{ height: 28, width: "auto", display: "block", marginInline: "auto", marginBottom: "var(--space-5)" }}
+          />
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "clamp(2rem, 3vw + 1rem, 3.25rem)",
+              letterSpacing: "-0.03em",
+              lineHeight: 1.02,
+              color: "var(--ink-primary)",
+            }}
+          >
+            Your AI workforce is one command away.
+          </h2>
+          <div style={{ marginTop: "var(--space-7)" }}>
+            <TerminalBlock idSuffix="cta" />
+          </div>
+          <div style={{ marginTop: "var(--space-5)" }}>
+            <a
+              href="https://github.com/sandydasari/openacme#readme"
+              style={{ color: "var(--ink-secondary)", fontSize: 14, fontWeight: 500, textDecoration: "none" }}
+            >
+              Read the docs →
+            </a>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer
+      style={{
+        paddingBlock: "var(--space-8) var(--space-7)",
+        borderTop: "1px solid var(--hairline)",
+        marginTop: "auto",
+      }}
+    >
+      <Container>
+        <div className="footer-grid">
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-mark-dark.svg" alt="" height={24} style={{ height: 24, width: "auto", display: "block" }} />
+              <span
+                style={{
+                  fontFamily: "var(--font-inter-tight), system-ui, sans-serif",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  letterSpacing: "-0.01em",
+                  color: "var(--ink-primary)",
+                }}
+              >
+                OpenAcme
+              </span>
+            </div>
+            <div style={{ marginTop: "var(--space-3)", fontSize: 13, color: "var(--ink-muted)" }}>
+              © 2026 OpenAcme. MIT licensed.
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3) var(--space-5)" }}>
+            <a href="https://github.com/sandydasari/openacme#readme" style={{ fontSize: 14, color: "var(--ink-secondary)", textDecoration: "none" }}>
+              Docs
+            </a>
+            <a href="https://github.com/sandydasari/openacme" style={{ fontSize: 14, color: "var(--ink-secondary)", textDecoration: "none" }}>
+              GitHub
+            </a>
+            <a href="#" style={{ fontSize: 14, color: "var(--ink-secondary)", textDecoration: "none" }}>
+              Privacy
+            </a>
+            <a href="#" style={{ fontSize: 14, color: "var(--ink-secondary)", textDecoration: "none" }}>
+              Status
+            </a>
+          </div>
+          <div style={{ fontSize: 13, fontStyle: "italic", color: "var(--ink-muted)", textAlign: "right" }} className="footer-attr">
+            Built with OpenAcme
+          </div>
+        </div>
+      </Container>
+    </footer>
+  );
+}
+
+export default function Page() {
+  return (
+    <>
+      <Nav />
+      <main>
+        <Hero />
+        <HowItWorks />
+        <UseCases />
+        <Features />
+        <Proof />
+        <CtaBanner />
+      </main>
+      <Footer />
+      <style jsx global>{`
+        @keyframes arc-drift {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          ellipse[style*="arc-drift"] { animation: none !important; }
+        }
+        .nav-docs { display: inline; }
+        @media (max-width: 768px) {
+          .nav-docs { display: none !important; }
+        }
+        .use-case-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: var(--space-7);
+          align-items: center;
+        }
+        .use-case-row .use-case-text { order: 1; }
+        .use-case-row .use-case-mockup { order: 2; }
+        @media (min-width: 1024px) {
+          .use-case-row { grid-template-columns: 1fr 1fr; gap: var(--space-9); }
+          .use-case-row.text-first .use-case-text { order: 1; }
+          .use-case-row.text-first .use-case-mockup { order: 2; }
+          .use-case-row.mockup-first .use-case-mockup { order: 1; }
+          .use-case-row.mockup-first .use-case-text { order: 2; }
+        }
+        .footer-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: var(--space-6);
+        }
+        @media (min-width: 768px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+          }
+        }
+        @media (max-width: 767px) {
+          .footer-attr { text-align: left !important; }
+        }
+      `}</style>
+    </>
   );
 }
