@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const INSTALL_COMMANDS = {
@@ -57,7 +58,7 @@ function Nav() {
             gap: "var(--space-5)",
           }}
         >
-          <a
+          <Link
             href="/"
             style={{
               display: "flex",
@@ -79,7 +80,7 @@ function Nav() {
             >
               OpenAcme
             </span>
-          </a>
+          </Link>
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-6)" }}>
             <a
               href="https://github.com/sandydasari/openacme#readme"
