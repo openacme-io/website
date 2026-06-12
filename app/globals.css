@@ -1,53 +1,103 @@
 @import "tailwindcss";
 
+/* Geist (variable, weights 100–900) loaded via next/font/local in app/layout.tsx.
+   The two @font-face declarations below are also emitted for spec acceptance A1
+   and as a fallback for any non-Next consumer. */
+@font-face {
+  font-family: "Geist";
+  src: url("./fonts/GeistVF.woff") format("woff");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("./fonts/GeistMonoVF.woff") format("woff");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
-  /* Color */
-  --bg-base: #141413;
-  --bg-surface: #1f1d1a;
-  --bg-elevated: #2f2c28;
-  --ink-primary: #f3e6c4;
-  --ink-secondary: #9a958a;
-  --ink-muted: #6b665e;
-  --hairline: rgba(243, 230, 196, 0.08);
-  --hairline-strong: rgba(243, 230, 196, 0.18);
-  --accent-glow: #d97757;
+  /* Surfaces — light (paper) */
+  --paper:        oklch(98.5% 0.004 75);
+  --paper-sunk:   oklch(94.5% 0.004 75);
+  --paper-rule:   oklch(86%   0.004 75);
 
-  /* Spacing (8-base) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --space-8: 64px;
-  --space-9: 96px;
-  --space-10: 144px;
+  /* Ink */
+  --ink:          oklch(22%   0.008 280);
+  --ink-soft:     oklch(42%   0.006 280);
+  --ink-faint:    oklch(48%   0.006 280);
 
-  /* Radii (semantic) */
-  --radius-pill: 9999px;
-  --radius-card: 8px;
-  --radius-chip: 4px;
-  --radius-block: 0px;
+  /* Accent — plot-red (≤10% coverage rule) */
+  --plot-red:      oklch(62%  0.19 28);
+  --plot-red-deep: oklch(54%  0.19 28);
+
+  /* Typography */
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Geometry — 0px everywhere */
+  --radius: 0rem;
+  --radius-hair: 1px;
+  --radius-control: 2px;
+  --border-hairline: 1px;
+
+  /* Shadows — forbidden; all no-ops */
+  --shadow-2xs: 0 0 0 0 transparent;
+  --shadow-xs:  0 0 0 0 transparent;
+  --shadow-sm:  0 0 0 0 transparent;
+  --shadow:     0 0 0 0 transparent;
+  --shadow-md:  0 0 0 0 transparent;
+  --shadow-lg:  0 0 0 0 transparent;
+  --shadow-xl:  0 0 0 0 transparent;
+  --shadow-2xl: 0 0 0 0 transparent;
+
+  /* Spacing (4-px base) */
+  --space-hair: 1px;
+  --space-0_5: 2px;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-24:  96px;
 
   /* Motion */
-  --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
-  --duration-fast: 150ms;
+  --motion-fast:    120ms;
+  --motion-default: 180ms;
+  --motion-slow:    280ms;
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark {
+  --paper:         oklch(16% 0.006 280);
+  --paper-sunk:    oklch(20% 0.006 280);
+  --paper-rule:    oklch(28% 0.006 280);
+
+  --ink:           oklch(94% 0.004 75);
+  --ink-soft:      oklch(75% 0.005 75);
+  --ink-faint:     oklch(58% 0.005 280);
+
+  --plot-red:      oklch(58% 0.18 28);
+  --plot-red-deep: oklch(48% 0.18 28);
 }
 
 html {
-  background: var(--bg-base);
+  background: var(--paper);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--bg-base);
-  color: var(--ink-primary);
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-  font-feature-settings: "cv11", "ss01";
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  text-rendering: optimizeLegibility;
 }
 
 p {
@@ -55,24 +105,127 @@ p {
 }
 
 h1, h2, h3 {
-  font-family: var(--font-inter-tight), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   text-wrap: balance;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 code, pre, .mono {
-  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--font-mono);
 }
 
-:focus-visible {
-  outline: 2px solid var(--ink-primary);
-  outline-offset: 3px;
+a {
+  color: inherit;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--plot-red);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+.hairline-h { border-top:    1px solid var(--paper-rule); }
+.hairline-b { border-bottom: 1px solid var(--paper-rule); }
+.hairline-l { border-left:   1px solid var(--paper-rule); }
+.hairline-r { border-right:  1px solid var(--paper-rule); }
+
+/* Stanza rows: mono label column + body column. */
+.stanza-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: baseline;
+}
+@media (max-width: 768px) {
+  .stanza-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* §4 How it feels: two scenes separated by a 1px vertical hairline. */
+.feel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0;
+}
+.feel-cell {
+  padding: 32px 40px;
+}
+.feel-divider {
+  background: var(--paper-rule);
+}
+@media (max-width: 768px) {
+  .feel-grid {
+    grid-template-columns: 1fr;
+  }
+  .feel-cell {
+    padding: 32px 0;
+  }
+  .feel-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
+
+/* §5 Four-views grid: single column on small screens. */
+@media (max-width: 768px) {
+  .views-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Nav + footer link hover. */
+.nav-link:hover {
+  color: var(--ink);
+}
+
+/* §5 cell hover: mono row color + arrow tint. */
+.view-cell-interactive:hover .view-label {
+  color: var(--ink);
+}
+.view-cell-interactive:hover .view-arrow {
+  color: var(--plot-red);
+}
+
+/* Primary button hover (light step). */
+.btn-primary:hover {
+  background: oklch(from var(--ink) calc(l + 6%) c h);
+}
+.btn-ghost:hover {
+  background: var(--paper-sunk);
+}
+.btn-copy:hover {
+  color: var(--ink);
+  background: var(--paper-sunk);
+}
+
+/* Skip link: visually hidden until focused. */
+.skip-link {
+  transform: translateY(-200%);
+  transition: transform var(--motion-default) var(--ease-out);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Mobile: hide wordmark in nav (logo + Install only). */
+@media (max-width: 640px) {
+  .nav-wordmark {
+    display: none;
+  }
+  .nav-link-github {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
     animation-iteration-count: 1 !important;
   }
 }

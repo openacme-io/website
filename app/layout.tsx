@@ -1,35 +1,38 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const interTight = localFont({
-  src: [
-    { path: "./fonts/InterTight-latin.woff2", weight: "500 600", style: "normal" },
-  ],
+const geist = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-sans",
+  weight: "100 900",
   display: "swap",
-  variable: "--font-inter-tight",
 });
 
-const inter = localFont({
-  src: [
-    { path: "./fonts/Inter-latin.woff2", weight: "400 500", style: "normal" },
-  ],
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-mono",
+  weight: "100 900",
   display: "swap",
-  variable: "--font-inter",
-});
-
-const jetbrainsMono = localFont({
-  src: [
-    { path: "./fonts/JetBrainsMono-latin.woff2", weight: "400 500", style: "normal" },
-  ],
-  display: "swap",
-  variable: "--font-jetbrains-mono",
 });
 
 export const metadata: Metadata = {
-  title: "OpenAcme — You're the CEO. OpenAcme is your workforce.",
+  title: "OpenAcme — An AI workforce. You're the founder.",
   description:
-    "You set the goal. OpenAcme's agents decompose it, route it, and ship. You stay in the decision seat — reviewing outcomes, not steps.",
+    "Named agents with roles, models, tools, and memory — that scales the way you want and self-organizes through delegation. You steer.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#fcfaf7",
 };
 
 export default function RootLayout({
@@ -40,9 +43,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${interTight.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${geist.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
