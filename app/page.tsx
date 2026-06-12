@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { track } from "./analytics";
 
 const REPO_URL = "https://github.com/sandydasari/openacme";
 const DOCS_URL = "https://github.com/sandydasari/openacme/tree/master/apps/docs";
@@ -318,6 +319,7 @@ function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handle = useCallback(() => {
+    track("Install: Copy", { command: value });
     void navigator.clipboard.writeText(value).then(() => {
       setCopied(true);
       if (timer.current) clearTimeout(timer.current);
@@ -516,6 +518,7 @@ function Nav() {
               target="_blank"
               rel="noreferrer"
               className="nav-link"
+              onClick={() => track("Nav: Docs")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 400,
@@ -532,6 +535,7 @@ function Nav() {
               target="_blank"
               rel="noreferrer"
               className="nav-link nav-link-github"
+              onClick={() => track("Nav: GitHub")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 400,
@@ -543,7 +547,7 @@ function Nav() {
             >
               GitHub ↗
             </a>
-            <PrimaryButton href="#install">Install</PrimaryButton>
+            <PrimaryButton href="#install" onClick={() => track("Nav: Install")}>Install</PrimaryButton>
           </div>
         </div>
       </Container>
@@ -592,8 +596,8 @@ function Hero() {
           memory — that scales the way you want and self-organizes through delegation. You steer.
         </p>
         <div style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <PrimaryButton href="#install">Install →</PrimaryButton>
-          <GhostButton href={REPO_URL}>GitHub ↗</GhostButton>
+          <PrimaryButton href="#install" onClick={() => track("Hero: Install")}>Install →</PrimaryButton>
+          <GhostButton href={REPO_URL} onClick={() => track("Hero: GitHub")}>GitHub ↗</GhostButton>
         </div>
         <p
           className="mono"
@@ -1058,7 +1062,10 @@ function FourViews() {
                   type="button"
                   className="view-cell view-cell-interactive"
                   style={cellStyle}
-                  onClick={() => setOpenView(v)}
+                  onClick={() => {
+                    track("Demo: Play", { view: v.key });
+                    setOpenView(v);
+                  }}
                   aria-label={`Watch ${v.label} demo`}
                 >
                   {cellInner}
@@ -1177,6 +1184,7 @@ function Footer() {
               target="_blank"
               rel="noreferrer"
               className="mono nav-link"
+              onClick={() => track("Footer: GitHub")}
               style={{
                 fontSize: 12,
                 color: "var(--ink-soft)",
@@ -1189,6 +1197,7 @@ function Footer() {
             <a
               href={MAILTO}
               className="mono nav-link"
+              onClick={() => track("Footer: Email")}
               style={{
                 fontSize: 12,
                 color: "var(--ink-soft)",
