@@ -236,24 +236,31 @@ function ChromaticMoment() {
       aria-hidden="true"
       style={{
         position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 520,
+        height: "140%",
         pointerEvents: "none",
         zIndex: 0,
       }}
     >
-      <svg width="500" height="560" viewBox="-250 -280 500 560" style={{ display: "block", mixBlendMode: "screen" }}>
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="-260 -280 520 560"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ display: "block", mixBlendMode: "screen" }}
+      >
         {[-120, 0, 120].map((x, i) => (
           <ellipse
             key={x}
             cx={x}
             cy={0}
-            rx={40}
-            ry={260}
+            rx={36}
+            ry={240}
             fill="#d97757"
-            opacity={0.75}
+            opacity={0.7}
             style={{
               transformOrigin: "center",
               animation: `arc-drift 6s ease-in-out ${i * 1.5}s infinite`,
