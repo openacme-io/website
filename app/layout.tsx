@@ -27,9 +27,9 @@ const jetbrainsMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "OpenAcme — Run a 5-person AI team with one operator.",
+  title: "OpenAcme — You're the CEO. OpenAcme is your workforce.",
   description:
-    "OpenAcme gives each agent a role, memory, and tools. They coordinate, hand off, and ship. You review results — not steps.",
+    "You set the goal. OpenAcme's agents decompose it, route it, and ship. You stay in the decision seat — reviewing outcomes, not steps.",
 };
 
 export default function RootLayout({

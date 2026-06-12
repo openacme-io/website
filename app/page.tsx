@@ -298,7 +298,7 @@ function Hero() {
                 color: "var(--ink-primary)",
               }}
             >
-              Run a 5-person AI team with one operator.
+              You&rsquo;re the CEO. OpenAcme is your workforce.
             </h1>
           </div>
 
@@ -313,7 +313,7 @@ function Hero() {
               fontWeight: 400,
             }}
           >
-            OpenAcme gives each agent a role, memory, and tools. They coordinate, hand off, and ship. You review results — not steps.
+            You set the goal. OpenAcme&rsquo;s agents decompose it, route it, and ship. You stay in the decision seat — reviewing outcomes, not steps.
           </p>
 
           <div
@@ -371,7 +371,7 @@ function Hero() {
 
 const STEPS = [
   { n: "01", title: "Define a goal", body: 'Type one sentence: "Ship a pricing page by Friday."' },
-  { n: "02", title: "Watch the team plan", body: "Manager decomposes. Builder builds. Designer reviews. Deployer ships." },
+  { n: "02", title: "Watch the workforce plan", body: "Manager decomposes. Builder builds. Designer reviews. Deployer ships." },
   { n: "03", title: "Review what shipped", body: "You see a working URL — and the full audit trail of how it got there." },
 ];
 
@@ -390,7 +390,7 @@ function HowItWorks() {
             color: "var(--ink-primary)",
           }}
         >
-          How a team ships.
+          How a workforce ships.
         </h2>
         <div style={{ borderTop: "1px solid var(--hairline)" }}>
           {STEPS.map((step) => (
@@ -783,7 +783,7 @@ function UseCases() {
             color: "var(--ink-primary)",
           }}
         >
-          What your AI team ships.
+          What your workforce ships.
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-10)" }}>
           <UseCase
