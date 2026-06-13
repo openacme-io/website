@@ -21,7 +21,6 @@ type View = {
   caption: string;
   image: string;
   alt: string;
-  video: string | null;
 };
 
 const VIEWS: View[] = [
@@ -31,7 +30,6 @@ const VIEWS: View[] = [
     caption: "Who's working, who's waiting on you.",
     image: "/product-hero.png",
     alt: "OpenAcme Home view — running daemon showing active agents and tasks.",
-    video: null,
   },
   {
     key: "agents",
@@ -39,7 +37,6 @@ const VIEWS: View[] = [
     caption: "Every coworker's role, persona, tools, model.",
     image: "/product-workforce.png",
     alt: "OpenAcme Agents view — workforce members with role, model, and tools.",
-    video: "/videos/demo-website-build.mp4",
   },
   {
     key: "tasks",
@@ -47,7 +44,6 @@ const VIEWS: View[] = [
     caption: "The shared board everyone reads from and writes to.",
     image: "/product-tasks.png",
     alt: "OpenAcme Tasks view — shared task board with status, dependencies, and assignees.",
-    video: "/videos/demo-code-review.mp4",
   },
   {
     key: "chat",
@@ -55,7 +51,6 @@ const VIEWS: View[] = [
     caption: "A session per agent, with tool calls inline.",
     image: "/product-chat.png",
     alt: "OpenAcme Chat view — session with one agent, tool calls inline.",
-    video: "/videos/demo-data-pipeline.mp4",
   },
 ];
 
@@ -841,125 +836,7 @@ function HowItFeels() {
   );
 }
 
-function VideoModal({ view, onClose }: { view: View; onClose: () => void }) {
-  const closeRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    const prev = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.documentElement.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
-  if (!view.video) return null;
-  const labelId = `modal-label-${view.key}`;
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={labelId}
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(26, 26, 30, 0.72)",
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "min(1024px, 92vw)",
-          background: "var(--paper)",
-          border: "1px solid var(--paper-rule)",
-          borderRadius: 0,
-        }}
-      >
-        <div
-          style={{
-            height: 48,
-            paddingInline: 16,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderBottom: "1px solid var(--paper-rule)",
-          }}
-        >
-          <span
-            id={labelId}
-            className="mono"
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "var(--ink-faint)",
-            }}
-          >
-            {view.label} · DEMO
-          </span>
-          <button
-            ref={closeRef}
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            style={{
-              width: 32,
-              height: 32,
-              padding: 0,
-              background: "transparent",
-              border: "1px solid var(--paper-rule)",
-              borderRadius: 0,
-              color: "var(--ink)",
-              cursor: "pointer",
-              fontSize: 18,
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
-        </div>
-        <video
-          controls
-          playsInline
-          preload="none"
-          poster={view.image}
-          style={{
-            display: "block",
-            width: "100%",
-            background: "var(--paper-sunk)",
-            aspectRatio: "16 / 9",
-          }}
-        >
-          <source src={view.video} type="video/mp4" />
-        </video>
-        <div
-          style={{
-            height: 48,
-            paddingInline: 16,
-            display: "flex",
-            alignItems: "center",
-            borderTop: "1px solid var(--paper-rule)",
-          }}
-        >
-          <span style={{ fontSize: 14, color: "var(--ink-soft)" }}>{view.caption}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function FourViews() {
-  const [openView, setOpenView] = useState<View | null>(null);
   return (
     <section
       style={{
@@ -980,7 +857,7 @@ function FourViews() {
             maxWidth: "60ch",
           }}
         >
-          Real screenshots of the running daemon. Click any view to watch the workforce work.
+          Real screenshots of the running daemon.
         </p>
         <div
           className="views-grid"
@@ -993,94 +870,58 @@ function FourViews() {
             border: "1px solid var(--paper-rule)",
           }}
         >
-          {VIEWS.map((v) => {
-            const interactive = !!v.video;
-            const cellInner = (
-              <>
-                <img
-                  src={v.image}
-                  alt={v.alt}
-                  loading="lazy"
+          {VIEWS.map((v) => (
+            <div
+              key={v.key}
+              className="view-cell"
+              style={{
+                background: "var(--paper)",
+                padding: 24,
+              }}
+            >
+              <img
+                src={v.image}
+                alt={v.alt}
+                loading="lazy"
+                style={{
+                  display: "block",
+                  width: "100%",
+                  height: "auto",
+                  border: "1px solid var(--paper-rule)",
+                  background: "var(--paper-sunk)",
+                }}
+              />
+              <div style={{ marginTop: 16 }}>
+                <p
+                  className="mono view-label"
                   style={{
-                    display: "block",
-                    width: "100%",
-                    height: "auto",
-                    border: "1px solid var(--paper-rule)",
-                    background: "var(--paper-sunk)",
+                    margin: 0,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--ink-faint)",
+                    lineHeight: 1,
                   }}
-                />
-                <div style={{ marginTop: 16 }}>
-                  <p
-                    className="mono view-label"
-                    style={{
-                      margin: 0,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      color: interactive ? "var(--ink-faint)" : "var(--ink-faint)",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {v.label}
-                    {interactive && (
-                      <>
-                        {" → WATCH "}
-                        <span className="view-arrow">▸</span>
-                      </>
-                    )}
-                  </p>
-                  <p
-                    style={{
-                      margin: 0,
-                      marginTop: 8,
-                      fontSize: 14,
-                      lineHeight: 1.55,
-                      color: "var(--ink-soft)",
-                    }}
-                  >
-                    {v.caption}
-                  </p>
-                </div>
-              </>
-            );
-            const cellStyle: React.CSSProperties = {
-              background: "var(--paper)",
-              padding: 24,
-              display: "block",
-              textAlign: "left",
-              border: "none",
-              width: "100%",
-              color: "inherit",
-              font: "inherit",
-              cursor: interactive ? "pointer" : "default",
-            };
-            if (interactive) {
-              return (
-                <button
-                  key={v.key}
-                  type="button"
-                  className="view-cell view-cell-interactive"
-                  style={cellStyle}
-                  onClick={() => {
-                    track("Demo: Play", { view: v.key });
-                    setOpenView(v);
-                  }}
-                  aria-label={`Watch ${v.label} demo`}
                 >
-                  {cellInner}
-                </button>
-              );
-            }
-            return (
-              <div key={v.key} className="view-cell" style={cellStyle}>
-                {cellInner}
+                  {v.label}
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    marginTop: 8,
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: "var(--ink-soft)",
+                  }}
+                >
+                  {v.caption}
+                </p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </Container>
-      {openView && <VideoModal view={openView} onClose={() => setOpenView(null)} />}
     </section>
   );
 }
